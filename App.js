@@ -15,6 +15,7 @@ import details from "./components/details"
 const Stack = createNativeStackNavigator(); 
 import Bidding from "./components/bidding"
 import Active from './components/active';
+import Activedetails from './components/activedetails';
 import { GlobalProvider } from './GlobalContext';
 
 const MyStack = () => {
@@ -35,6 +36,7 @@ const MyStack = () => {
         <Stack.Screen name="details" component={details} options={{ title: '' }} />
         <Stack.Screen name="feedback" component={feedback} options={{ title: '' }} />
         <Stack.Screen name="active" component={Active} options={{ title: '' }} />
+        <Stack.Screen name="activedetails" component={Activedetails} options={{ title: '' }} />
       </Stack.Navigator>
     </NavigationContainer>
     </GlobalProvider>   

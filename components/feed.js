@@ -54,7 +54,7 @@ const Feed = () => {
   };
   const handleProfilePress = () => {
     // Handle navigation to profile
-    navigation.navigate('feedback');
+    navigation.navigate('profile');
   };
   const handleCreatePress = () => {
     // Handle navigation to create
@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     padding: 2,
     width: 30,
     height: 30,
-    left: -10,
+    left: -60,
   },
   buttonText: {
     color: 'black',

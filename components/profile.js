@@ -6,55 +6,55 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from 'jwt-decode';
 import axios from 'axios';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useTranslation } from 'react-i18next';
-const retrieveToken = async () => {
-  try {
-    const token = await AsyncStorage.getItem('token');
+import { useTranslation } from 'react-i18next'; 
+const Profile = () => { 
+  const [uid, setUid] = useState();
+  const navigation = useNavigation();
+ const [userDetails,setUserDetails]=useState([]);
+  const retrieveToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
 
-    if (token) {
-      console.log('Token retrieved successfully');
-      const decodedToken = jwt_decode(token);
-      const { name, id } = decodedToken;
-      console.log(name);
-      console.log(id);
-      return { name, id };
-    } else {
-      console.log('Token not found');
+      if (token) {
+        console.log('Token retrieved successfully');
+        const decodedToken = jwt_decode(token);
+        const { userId } = decodedToken;
+        setUid(userId);
+        return userId;
+      } else {
+        console.log('Token not found');
+        return null;
+      }
+    } catch (error) {
+      console.error('Failed to retrieve token', error);
       return null;
     }
-  } catch (error) {
-    console.error('Failed to retrieve token', error);
-    return null;
-  }
-};
-
-const Profile = () => {
-  const [uname, setUname] = useState('');
-  const [amount, setAmount] = useState(0);
-  const [uid, setUId] = useState('');
-  const [userid, setUserId] = useState('');
-  const [isadmin, setIsadmin] = useState(false);
-  const [paymentId,setpaymentId]=useState('');
-  const [description,setDescription]=useState('');
-  const [paymentlist, setpaymentlist] = useState([]);
-  const [invitestatus, setInvitestatus] = useState(null)
-  const navigation = useNavigation();
- 
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    fetchUserDetails();
-  }, []);
-
-  const fetchUserDetails = async () => {
-    // try {
-    //   const response = await axios.get('https://api.example.com/user');
-    //   setUser(response.data);
-    // } catch (error) {
-    //   console.error('Error fetching user details:', error);
-    // }
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      await retrieveToken();
+    };
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const  fetchUserDetails = async () => {
+      console.log('id', uid);
+      try {
+        if (uid) {
+          const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/user/details/${uid}`);
+          console.log('successfully fetched userdetails', response.data);
+          setUserDetails(response.data);
+        }
+      } catch (error) {
+        console.error('Error fetching ', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [uid]);
+ 
   // if (!user) {
   //   return (
   //     <View style={styles.container}>
@@ -62,12 +62,17 @@ const Profile = () => {
   //     </View>
   //   );
   // }
+  const handleEdit=()=>{
 
+  }
+ const handleHistory=()=>{
+  navigation.navigate('history');
+ }
   return (
     <View style={styles.container}> 
     <View style={styles.head}>
         <Text style={styles.heading}>Profile</Text>
-        <TouchableOpacity style={styles.sendButton} onPress   >
+        <TouchableOpacity style={styles.sendButton} onPress={handleEdit}   >
           <Text style={styles.sendButtonText}>Edit</Text>
         </TouchableOpacity>
       </View>
@@ -76,12 +81,36 @@ const Profile = () => {
           source={require('./profile.png')}  
           style={styles.profileImage}
         />
-        <Text style={styles.userName}>John Doe</Text>  
+        <Text style={styles.userName}>{userDetails.username}</Text>  
       </View>  
       <View style={styles.bottom}>
-        <Text style={styles.Item}>Email: userEmail</Text>
-        <Text style={styles.Item}>Address: userAddress</Text>
-        <Text style={styles.Item}>Rating: userRating</Text>
+      <View style={styles.detailContainer}>
+            <View>
+              <Text style={styles.semilight}>Address</Text>
+              <Text style={styles.light}>{userDetails.address}</Text>
+            </View>
+            <View style={styles.horizontalLine} />
+            <View>
+              <Text style={styles.semilight}>ID</Text>
+              <Text style={styles.light}>{userDetails._id}</Text>
+            </View>
+            <View style={styles.horizontalLine} />
+            <View>
+              <Text style={styles.semilight}>Email</Text>
+              <Text style={styles.light}>{userDetails.email}</Text>
+            </View>
+            <View style={styles.horizontalLine} />
+            <View>
+              <Text style={styles.semilight}>Phone</Text>
+              <Text style={styles.light}>{userDetails.phone}</Text>
+            </View>
+            <View style={styles.horizontalLine} />
+            <View>  
+            <TouchableOpacity style={styles.button} onPress={handleHistory}>
+                <Text style={styles.buttonText}>History</Text>
+            </TouchableOpacity>
+            </View>
+          </View>
       </View>
         
     </View>
@@ -126,7 +155,7 @@ userInfo: {
   marginBottom: 10,
 },
 bottom:{
-  marginTop:150,
+  marginTop:50,
 },
 Item: {
   flexDirection: 'row',
@@ -138,6 +167,43 @@ Item: {
   fontSize: 16,
   fontWeight: 'bold',
   width:300
+},
+detailContainer: {
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  alignItems: 'left',
+  paddingHorizontal: 20,
+},
+horizontalLine: {
+  borderBottomColor: '#ccc',
+  borderBottomWidth: 1,
+  width: '100%',
+  marginVertical: 10,
+},
+semilight: {
+  fontSize: 16,
+  fontWeight: '200',
+  marginBottom: 4,
+  color: '#333',
+},
+light: {
+  fontSize: 16,
+  fontWeight: '400',
+  marginBottom: 10,
+  color: 'black',
+},
+button: {
+  backgroundColor: '#333',
+  padding: 10,
+  borderRadius: 5,
+  marginTop: 0,
+  marginBottom: 0,
+  alignItems: 'center',
+},
+buttonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: 'bold',
 },
 });
 export default Profile;

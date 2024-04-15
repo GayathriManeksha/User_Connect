@@ -17,6 +17,17 @@ export default function Details({ route }) {
   const { bidId, workerId } = route.params;
 
   const handleButtonPress = async () => {
+    if (!day || !month || !year || !hours || !minutes || !period) {
+      // Display alert if any of the fields are empty
+      Alert.alert(
+        'Incomplete Details',
+        'Please enter all fields before submitting.',
+        [{ text: 'OK', onPress: () => console.log('OK Pressed') }],
+        { cancelable: false }
+      );
+      return; // Exit the function early if any field is empty
+    }
+    
     try {
       // Combine date and time inputs
       const dateTimeString = `${year}-${month}-${day}T${hours}:${minutes} ${period}`;

@@ -15,19 +15,7 @@ const ListingPage = ({ route }) => {
     <View style={styles.container}>
       {/* MapView for the top half of the screen */}
       <View style={styles.mapContainer}>
-        {/* <MapView
-          style={styles.map}
-          initialRegion={{
-            // Set the initial region based on your requirements
-            latitude: 37.7749,
-            longitude: -122.4194,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-        > */}
-          {/* Add markers or other map elements as needed */}
-          {/* <Marker coordinate={{ latitude: 37.7749, longitude: -122.4194 }} title="Marker" />
-        </MapView> */}
+        
       </View>
 
       {/* Worker list for the bottom half of the screen */}

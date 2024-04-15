@@ -1,20 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TextInput, View, TouchableOpacity, Text ,FlatList,ScrollView} from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, FlatList, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-//import Ionicons from 'react-native-vector-icons/Ionicons'; 
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import { useTranslation } from 'react-i18next';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from "jwt-decode";
 import axios from 'axios';
 
 export default function History() {
-  const [unit_name, setName] = useState('');
-  const [unit_id, setunitId] = useState('');
   const [workers, setWorkers] = useState([]);
-  const [uid,setUId]=useState();
- 
+  const [uid, setUid] = useState();
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      await retrieveToken();
+    };
+    fetchData();
+  }, []);
+
   const retrieveToken = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
@@ -22,77 +24,59 @@ export default function History() {
       if (token) {
         console.log('Token retrieved successfully');
         const decodedToken = jwt_decode(token);
-        const { name, id } = decodedToken;
-        setUId(decodedToken.userId)
-        console.log(name)
-        console.log(id)
-        return { name, id };
+        setUid(decodedToken.userId);
       } else {
         console.log('Token not found');
-        return null;
       }
     } catch (error) {
       console.error('Failed to retrieve token', error);
-      return null;
     }
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      await retrieveToken(); 
-    };
-    fetchData();
-  }, [])
-
-  useEffect(() => { 
     const fetchWorkers = async () => {
-      console.log('id',uid);
+      console.log('id', uid);
       try {
-        if(uid){
+        if (uid) {
           const response = await axios.post(`${process.env.EXPO_PUBLIC_API_URL}/user/chat/workers`, {
             userId: uid,
           });
-        console.log('successful', response.data.workers);
-        setWorkers(response.data.workers)
+          console.log('successful', response.data.workers);
+          setWorkers(response.data.workers);
         }
-        //socket.emit("createRoom", response.data.chatId);
-        // You may want to update the state or perform additional actions based on the response
       } catch (error) {
-        console.error('Error adding request for:', error);
+        console.error('Error fetching workers:', error);
       }
     };
 
     fetchWorkers();
-  }, [uid]); 
- 
+  }, [uid]);
+
+  const handleWorkerPress = (workerId) => {
+    // Navigate to the "Bidding" page with worker ID as parameter
+    navigation.navigate('bidding', { workerId });
+  };
+
   return (
     <View style={styles.container}>
-    <View style={styles.mapContainer}>
-     
-  </View>
-    <View style={styles.workerListContainer}>
-       <Text>list</Text>
-    <ScrollView>
-      <FlatList
-        data={workers}
-         
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.workerItem}>
-            <Text style={styles.workerName}>{item.name}</Text> 
-          </TouchableOpacity>
-        )}
-      />
-    </ScrollView>
-  </View>
-  </View>
+      <View style={styles.workerListContainer}>
+        <Text style={styles.heading}>Appointment History</Text>
+        <ScrollView>
+          <FlatList
+            data={workers}
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.workerItem} onPress={() => handleWorkerPress(item.id)}>
+                <Text style={styles.workerName}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </ScrollView>
+      </View>
+    </View>
   );
 }
 
-
-
 const styles = StyleSheet.create({
-  
-  
   workerListContainer: {
     flex: 1,
     borderTopLeftRadius: 20,
@@ -113,17 +97,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  workerAmount: {
-    fontSize: 16,
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
   },
-  mapContainer: { 
-    margin:10,
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
+  heading: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    padding:10,
   },
 });

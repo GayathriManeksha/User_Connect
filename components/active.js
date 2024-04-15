@@ -4,10 +4,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from "jwt-decode";
 import axios from 'axios';
-
+import { useNavigation } from '@react-navigation/native';
 export default function Active() {
   const [activeWorkers, setActiveWorkers] = useState([]);
   const [uid, setUid] = useState();
+  const navigation = useNavigation();
 
   const retrieveToken = async () => {
     try {
@@ -63,7 +64,7 @@ export default function Active() {
             data={activeWorkers}
             renderItem={({ item }) => (
               <View style={styles.workerContainer}>
-                <TouchableOpacity style={styles.workerItem}>
+                <TouchableOpacity style={styles.workerItem}  onPress={() => navigation.navigate('activedetails', { worker: item.worker,amt:item.amount })}>
                   <View style={styles.workerInfoContainer}>
                     <View style={styles.workerNameContainer}>
                       <Icon name="account-circle" size={24} color="#333" style={{ marginRight: 8 }} />
@@ -93,6 +94,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
+    padding:10,
   },
   workerListContainer: {
     flex: 1,
