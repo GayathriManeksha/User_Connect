@@ -7,7 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from "jwt-decode";
 import socket from "../utils/socket";
 import * as Location from 'expo-location';
-
+import { color } from 'react-native-elements/dist/helpers';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 const CategoryPage = ({ route }) => {
   const { category } = route.params;
   const navigation = useNavigation();
@@ -144,28 +145,28 @@ const CategoryPage = ({ route }) => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.workerItem}>
-      <View style={styles.workerAvatar} />
-      <View style={styles.workerInfo}>
-        <Text style={styles.workerName}>{item.username}</Text>
-        <Text style={styles.workerDetails}>{parseFloat((item.distance).toPrecision(2))}KM</Text>
-      </View>
-      <TouchableOpacity
-        style={styles.bookButton}
-        onPress={() => handleBook(item._id)}
-      >
-        <Text style={styles.bookButtonText}>CHAT</Text>
-      </TouchableOpacity>
+    <View style={styles.workerItem}> 
+      <Icon name="account-circle" size={24} color="#781C68" style={{ marginRight: 8 }} />
+    <View style={styles.workerInfo}>
+      <Text style={styles.workerName}>{item.username}</Text>
+      <Text style={styles.workerDistance}>{parseFloat(item.distance).toFixed(2)} KM</Text>
     </View>
+    <TouchableOpacity
+      style={styles.bookButton}
+      onPress={() => handleBook(item._id)}
+    >
+      <Text style={styles.bookButtonText}>CHAT</Text>
+    </TouchableOpacity>
+  </View>
   );
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="location" size={28} color="#000" />
+        <Ionicons name="location" size={28} color="#781C68" />
         <View style={styles.column}>
-        <Text>Workers near your location</Text>
-        <Text>{address}</Text>
+        <Text  style={{ color: '#781C68' }}>Workers near your location</Text>
+        <Text style={{ color: 'grey' }}>{address}</Text>
         </View>
         
         {/* <Text style={styles.categoryText}>{category}</Text> */}
@@ -206,16 +207,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 16,
+    color:'#781C68'
   },
   column: {
     flexDirection: 'column',
     alignItems: 'left', 
-    padding:10
+    padding:10,
+    color:'#BE8EB2'
   },
   categoryText: {
     fontSize: 20,
     fontWeight: 'bold',
     marginLeft: 8,
+    color:'#781C68'
   },
   searchContainer: {
     flexDirection: 'row',
@@ -229,16 +233,26 @@ const styles = StyleSheet.create({
   workerItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: '#FFF',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    marginBottom: 10,
   },
   workerAvatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 16,
-    backgroundColor: '#e0e0e0',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#D3D3D3', // Placeholder color
+    marginRight: 10,
   },
   workerInfo: {
     flex: 1,
@@ -246,6 +260,8 @@ const styles = StyleSheet.create({
   workerName: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 4,
+    color: '#333', // Darker text color
   },
   workerDetails: {
     fontSize: 14,
@@ -259,16 +275,20 @@ const styles = StyleSheet.create({
     height: 40,
     color: '#000',
   },
+  workerDistance: {
+    fontSize: 14,
+    color: '#666', // Lighter text color
+  },
   bookButton: {
-    backgroundColor: 'black',
-    paddingVertical: 8,
+    backgroundColor: '#954C85',
+    borderRadius: 5,
     paddingHorizontal: 16,
-    borderRadius: 8,
-    marginLeft: 'auto',
+    paddingVertical: 8,
   },
   bookButtonText: {
-    color: '#fff',
+    fontSize: 14,
     fontWeight: 'bold',
+    color: '#FFF',
   },
   searchContainer: {
     flexDirection: 'row',

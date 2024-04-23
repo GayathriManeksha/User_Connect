@@ -9,7 +9,7 @@ export default function Activedetails({route}) {
   const [activeWorker, setActiveWorker] = useState([]);
   const [uid, setUid] = useState();
   const navigation = useNavigation();
-  const { worker ,amt} = route.params;
+  const { worker ,amt,app_id} = route.params;
   console.log('worker details',worker);
   const retrieveToken = async () => {
     try {
@@ -31,7 +31,7 @@ export default function Activedetails({route}) {
     }
   };
 
-  const handleWorkDone = () => {
+  const handleWorkDone = async() => {
     Alert.alert(
       'Confirm Work Done',
       'Are you sure you want to mark this work as done?',
@@ -45,47 +45,156 @@ export default function Activedetails({route}) {
           onPress: () => {
             // Add your logic here for marking the work as done
             console.log('Work marked as done');
-            navigation.navigate('feedback');
+            navigation.navigate('activedetails', { worker,amt,app_id});
           },
         },
       ],
       { cancelable: false }
     );
+    const response = await axios.put(`${process.env.EXPO_PUBLIC_API_URL}/appointment/completed/${app_id}`);
+    console.log(response.message)
   };
-  const handlePay=()=>{
+  const handlePay=()=>{   
 
   }
   const handleFeedback=()=>{
-    navigation.navigate('feedback');
+    navigation.navigate('feedback',{app_id});
   }
+
+  const [workActive,setWorkActive] =useState(0);
+  const [workInProgress,setWorkInProgress] =useState(0);
+  const [workCompleted,setWorkCompleted]=useState(0);
+  const [paymentDone,setPaymentDone]=useState(0);
+
   useEffect(() => {
+    console.log("fetchdata",app_id)
     const fetchData = async () => {
-      await retrieveToken();
+    try{
+      console.log(`${process.env.EXPO_PUBLIC_API_URL}/appointment/status/${app_id}`)
+      if(app_id){
+      const response = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/appointment/status/${app_id}`);
+      console.log('progress value',response.data)
+      const progress=response.data.status
+      console.log('progress',progress)
+      if(progress=="active"){
+        setWorkActive(true);
+      }
+      else if(progress=="progress")
+      {
+        setWorkActive(true);
+        setWorkInProgress(true);
+      }
+      else if(progress=="completed")
+      {
+        setWorkActive(true);
+        setWorkInProgress(true);
+        setWorkCompleted(true);
+      }
+      else if(progress=="paid")
+      {
+        setWorkActive(true);
+        setWorkInProgress(true);
+        setWorkCompleted(true);
+        setPaymentDone(true);
+      }
+      } 
+    }
+    catch(error)
+    {
+        console.log(error)
     };
-    fetchData();
-  }, []);
- 
+  }
+  fetchData();
+}, [app_id]);
+    
+ const handleFeed=()=>{
+  navigation.navigate('feed');
+ }
   return (
     <View style={styles.container}>
-      <View style={styles.workerListContainer}>
-        <Text style={styles.heading}>Worker Details</Text>
-
+      <View style={styles.workerListContainer}> 
         <View style={styles.workerInfoContainer}>
           <View style={styles.workerNameContainer}>
-            <Icon name="account-circle" size={24} color="#333" style={{ marginRight: 8 }} />
+            <Icon name="account-circle" size={24} color="#781C68" style={{ marginRight: 8 }} />
             <Text style={styles.workerName}>{worker.username}</Text>
             <Text style={styles.workeramount}>Rs.{amt}</Text>
           </View>
+          <View style={styles.horizontalLine} />
+          <View style={styles.expandedContent}>
+            
+          {workActive ? (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Icon name="check-circle" size={20} color="#a06d95" marginLeft={2} />
+      <Text style={styles.updateText}>Work is Active</Text>
+    </View>
+  </View>
+) : (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={styles.updateText}>Work in Active</Text>
+    </View>
+  </View>
+)}
+
+{workInProgress ? (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Icon name="check-circle" size={20} color="#a06d95" marginLeft={2} />
+      <Text style={styles.updateText}>Work in Progress</Text>
+    </View>
+  </View>
+) : (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={styles.updateText}>Work in Progress</Text>
+    </View>
+  </View>
+)}
+
+{workCompleted ? (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Icon name="check-circle" size={20} color="#a06d95" marginLeft={2} />
+      <Text style={styles.updateText}>Work completed</Text>
+    </View>
+  </View>
+) : (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={styles.updateText}>Work Completed</Text>
+    </View>
+  </View>
+)}
+
+{paymentDone ? (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Icon name="check-circle" size={20} color="#a06d95" marginLeft={2} />
+      <Text style={styles.updateText}>Payment Done</Text>
+    </View>
+  </View>
+) : (
+  <View style={styles.updateContainer}> 
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Text style={styles.updateText}>Payment Done</Text>
+    </View>
+  </View>
+)}
+
+              
+          </View> 
+
           <View style={styles.detailContainer}>
             <View>
               <Text style={styles.semilight}>Profession</Text>
               <Text style={styles.light}>{worker.profession}</Text>
             </View>
-            <View style={styles.horizontalLine} />
-            <View>
+             
+            {/* <View>
               <Text style={styles.semilight}>ID</Text>
               <Text style={styles.light}>{worker._id}</Text>
-            </View>
+            </View> */}
             <View style={styles.horizontalLine} />
             <View>
               <Text style={styles.semilight}>Email</Text>
@@ -105,11 +214,18 @@ export default function Activedetails({route}) {
                 <Text style={styles.buttonText}>Feed Back</Text>
             </TouchableOpacity>
           </View>
+          {workCompleted ?
           <View>
-            <TouchableOpacity style={styles.button} onPress={handleWorkDone}>
-                <Text style={styles.buttonText}>Work Done</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.button} onPress={handleFeed}>
+              <Text style={styles.buttonText}>Feed</Text>
+          </TouchableOpacity>
+        </View>
+          : <View>
+          <TouchableOpacity style={styles.button} onPress={handleWorkDone}>
+              <Text style={styles.buttonText}>Work Done</Text>
+          </TouchableOpacity>
+        </View>}
+          
         </View>
 
       </View>
@@ -123,15 +239,15 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 30,
-    padding:10
+    padding:10,
+    color:'#781C68',
   },
   workerListContainer: {
     flex: 1,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     backgroundColor: '#fff',
-    padding: 16,
-    marginTop: -20,
+    padding: 16, 
   },
   
   workerContainer: {
@@ -158,8 +274,7 @@ const styles = StyleSheet.create({
   },
   workerNameContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 40,
+    alignItems: 'center', 
   },
   btncontainer: {
     display:'flex',
@@ -171,7 +286,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 0,
-    color: 'grey', // Darker text color
+    color: '#781C68', // Darker text color
     padding:5
   },
   workeramount: {
@@ -198,7 +313,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   semilight: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: '200',
     marginBottom: 4,
     color: '#333',
@@ -210,11 +325,10 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   button: {
-    backgroundColor: '#333',
+    backgroundColor: '#781C68',
     padding: 10,
-    borderRadius: 5,
-    marginTop: 90,
-    marginBottom: 0,
+    borderRadius: 5, 
+    marginBottom: -10,
     alignItems: 'center',
   },
   buttonText: {
@@ -223,7 +337,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonLeft: {
-    backgroundColor: '#d6c25a',
+    backgroundColor: '#781C68',
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
@@ -239,5 +353,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 10,
     marginTop: 10,
+  },
+  updateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 3,
+    padding:10,
+    marginTop:10
+  },
+  updateText: {
+    marginLeft: 5,
   },
 });

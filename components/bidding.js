@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, ScrollView, Pressable } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, ScrollView, Pressable ,Image ,TouchableWithoutFeedback } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,7 +29,7 @@ const Bidding = ({ route }) => {
   const [bidId, setBidId] = useState(null);
   const [sub, setSub] = useState(false);
   const [status, setStatus] = useState(-1);
-
+  const [showTooltip, setShowTooltip] = useState(false);
   const generateID = () => Math.random().toString(36).substring(2, 10);
 
   const retrieveToken = async () => {
@@ -209,7 +209,7 @@ const Bidding = ({ route }) => {
     const BidData = {
       amount: parseInt(amt),
       timestamp: currentTime,
-      chatId: id,
+      //chatId: id,
       userId: uid,
       workerId,
       sender: { role: 'user' },
@@ -269,9 +269,21 @@ const Bidding = ({ route }) => {
       (status === -1 ) &&
         <View style={styles.head}>
           <Text style={styles.heading}>Chat With {workername}</Text>
-          <TouchableOpacity style={styles.sendButton} onPress={() => setVisible(true)} disabled={selfaccepted || workeraccepted} >
+          <View>
+        <TouchableWithoutFeedback
+          onPressIn={() => setShowTooltip(true)}
+          onPressOut={() => setShowTooltip(false)}
+        >
+          <TouchableOpacity style={styles.sendButton} onPress={() => setVisible(true)} disabled={selfaccepted || workeraccepted}>
             <Text style={styles.sendButtonText}>Bid</Text>
           </TouchableOpacity>
+        </TouchableWithoutFeedback>
+        {showTooltip && (
+          <View style={styles.tooltip}>
+            <Text style={styles.tooltipText}>Click to place a bid</Text>
+          </View>
+        )}
+      </View>
         </View>
         }
 
@@ -294,6 +306,7 @@ const Bidding = ({ route }) => {
         {
           selfaccepted &&
           <View style={styles.popuplabelContainer}>
+            <Image source={require('../assets/pop.jpg')} style={styles.image} />
             <Text style={styles.whiteText}>You have accepted the Request</Text>
             <Text style={styles.whiteText}>click to Confirm</Text>
             <Text style={styles.labelText}> Rs.{label}</Text>
@@ -311,6 +324,7 @@ const Bidding = ({ route }) => {
         {
           workeraccepted &&
           <View style={styles.popuplabelContainer}>
+             <Image source={require('../assets/pop.jpg')} style={styles.image} />
             <Text style={styles.whiteText}>Worker has accepted the Request</Text>
             <Text style={styles.labelText}> {label}</Text>
             <View style={styles.acceptRejectContainer}>
@@ -344,12 +358,10 @@ const Bidding = ({ route }) => {
               ) : (
                 <View style={[
                   styles.labelContainer,
-                  { backgroundColor: msg.sender.role === 'user' ? '#f0f0f0' : '#C0C0C0' }
+                  { backgroundColor: msg.sender.role === 'user' ? '#E6D1E0' : 'white' }
                 ]}>
                   <Text style={styles.labelText}>{msg.content.bidAmount}</Text>
-                  <Text style={styles.timerText}>
-                    Timer: {Math.floor(timer / 60)}:{timer % 60 < 10 ? '0' : ''}{timer % 60}
-                  </Text>
+                   
                   {msg.sender.role !== "user" ? (
                     <View style={styles.acceptRejectContainer}>
                       <Pressable style={styles.acceptButton} onPress={() => handleAccept(msg.content.bidAmount, msg._id)}>
@@ -419,7 +431,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: '#F5F5F5',
+    backgroundColor: 'white',
   },
   head: {
     backgroundColor: 'white',
@@ -430,8 +442,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  heading: {
-    color: 'black',
+  heading: { 
+    
+    color:'#781C68',
     fontWeight: 'bold',
     fontSize: 18,
     padding: 5,
@@ -442,8 +455,8 @@ const styles = StyleSheet.create({
   },
   chatContainer: {
     flex: 1,
-    marginBottom: 10,
-    color: 'blue', // Assuming this is for text color
+    marginBottom: 10, 
+     
   },
   messageContainer: {
     flexDirection: 'row',
@@ -456,17 +469,21 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginRight: 20,
   },
-  messageUserText: {
-
-    backgroundColor: '#f0f0f0',
-    padding: 10,
-    borderRadius: 10,
-  },
   messageWorkerText: {
 
-    backgroundColor: '#C0C0C0',
+    backgroundColor:  '#954C85'    ,
     padding: 10,
     borderRadius: 10,
+    color:'#E6D1E0',
+  },
+  messageUserText: {
+
+    backgroundColor: '#E6D1E0'    ,
+    padding: 10,
+    borderRadius: 10,
+    color:'#781C68',
+   
+
   },
 
   timeText: {
@@ -487,13 +504,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    color: ' #781C68',
     borderRadius: 5,
     paddingHorizontal: 10,
     marginRight: 10,
   },
   sendButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#781C68',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 5,
@@ -506,7 +523,7 @@ const styles = StyleSheet.create({
     marginTop: 20, // Adjusted margin top to create space between label and messages
     alignItems: "center",
     borderRadius: 10,
-    borderColor: 'black',
+    borderColor: '#781C68',
     borderWidth: 1,
     paddingVertical: 10,
     margin: 10,
@@ -516,7 +533,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 10,
     fontWeight: 'bold',
-    color: 'black', // Adjust color as needed
+    color: '#781C68', // Adjust color as needed
     padding: 20
   },
   timerText: {
@@ -527,7 +544,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   acceptButton: {
-    backgroundColor: "black",
+    backgroundColor: "#781C68",
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 5,
@@ -560,7 +577,7 @@ const styles = StyleSheet.create({
   modalinput: {
     height: 40,
     width: 250,
-    borderColor: "gray",
+    borderColor: "grey",
     borderWidth: 1,
     paddingHorizontal: 10,
     marginBottom: 20,
@@ -569,7 +586,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   modalbutton: {
-    backgroundColor: "black",
+    backgroundColor: "#954C85",
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 5,
@@ -580,7 +597,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   popuplabelContainer: {
-    backgroundColor: 'grey',
+    backgroundColor: 'white',
     borderRadius: 15,
     margin: 10,
     height: '50%',
@@ -589,7 +606,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   whiteText: {
-    color: '#d6c25a',
+    color: 'grey',
     fontSize: 16,
     padding: 10
     // Additional styles if needed
@@ -599,6 +616,23 @@ const styles = StyleSheet.create({
   },
   UserContainer: {
     alignSelf: 'flex-start',
+  },
+  image: {
+    height:100,
+     resizeMode: 'contain', // Adjust the image to fit inside the container
+     marginBottom:100
+   },
+   tooltip: {
+    position: 'absolute',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 5,
+    padding: 5,
+    top: 40, // Adjust this value to position the tooltip relative to the button
+    left: 20, // Adjust this value to position the tooltip relative to the button
+  },
+  tooltipText: {
+    color: '#fff',
+    fontSize: 14,
   },
 });
 

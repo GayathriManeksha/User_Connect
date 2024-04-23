@@ -70,12 +70,7 @@ const Profile = () => {
  }
   return (
     <View style={styles.container}> 
-    <View style={styles.head}>
-        <Text style={styles.heading}>Profile</Text>
-        <TouchableOpacity style={styles.sendButton} onPress={handleEdit}   >
-          <Text style={styles.sendButtonText}>Edit</Text>
-        </TouchableOpacity>
-      </View>
+     
       <View style={styles.profileContainer}>
         <Image
           source={require('./profile.png')}  
@@ -132,23 +127,27 @@ head: {
   paddingHorizontal: 20,
 },
 heading: {
-  color: 'black',
+  color: '#781C68',
   fontWeight: 'bold',
   fontSize: 18,
   padding: 10,
 }, 
 profileContainer: {
   alignItems: 'center',
+  margin:10
 },
 profileImage: {
   width: 150,
   height: 150,
   borderRadius: 75,
-  marginBottom: 20,
+  marginBottom: 20, 
+  tintColor: '#781C68',
+  padding:5
 }, 
 userName: {
   fontSize: 24,
   fontWeight: 'bold',
+  color:'#781C68', 
 },
 userInfo: {
   fontSize: 16,
@@ -162,7 +161,7 @@ Item: {
   justifyContent: 'space-between',
   alignItems: 'center',
   borderBottomWidth: 1,
-  borderBottomColor: '#ccc',
+  borderBottomColor: '#781C68',
   paddingVertical: 12,
   fontSize: 16,
   fontWeight: 'bold',
@@ -187,10 +186,10 @@ semilight: {
   color: '#333',
 },
 light: {
-  fontSize: 16,
+  fontSize: 12,
   fontWeight: '400',
   marginBottom: 10,
-  color: 'black',
+  color: '#781C68',
 },
 button: {
   backgroundColor: '#333',
@@ -199,9 +198,10 @@ button: {
   marginTop: 0,
   marginBottom: 0,
   alignItems: 'center',
+  backgroundColor:'#781C68'
 },
 buttonText: {
-  color: '#fff',
+  color: 'white',
   fontSize: 16,
   fontWeight: 'bold',
 },

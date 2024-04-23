@@ -20,7 +20,7 @@ const ListingPage = ({ route }) => {
 
       {/* Worker list for the bottom half of the screen */}
       <View style={styles.workerListContainer}>
-        <ScrollView>
+        
           <FlatList
             data={availableWorkers}
             keyExtractor={(item) => item.id.toString()}
@@ -30,8 +30,7 @@ const ListingPage = ({ route }) => {
                 <Text style={styles.workerAmount}>{item.amount}</Text>
               </TouchableOpacity>
             )}
-          />
-        </ScrollView>
+          /> 
       </View>
     </View>
   );

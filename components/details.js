@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, TextInput, View, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, TextInput, View, TouchableOpacity, Text ,Alert} from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons'; // Import MaterialIcons for icons
 import moment from 'moment'; // Import moment for date-time handling
 import { useNavigation } from '@react-navigation/native';
@@ -60,12 +60,13 @@ export default function Details({ route }) {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.label1}>Enter Date and Time for the work and click on the submit button</Text>
       <View style={styles.form}>
         <Text style={styles.label}>Enter Details</Text>
 
         {/* Date input: Day, Month, Year */}
         <View style={styles.inputRow}>
-          <MaterialIcons name="date-range" size={24} color="#000" />
+          <MaterialIcons name="date-range" size={24} color="#781C68" />
           <TextInput
             style={styles.input}
             placeholder="dd"
@@ -94,7 +95,7 @@ export default function Details({ route }) {
 
         {/* Time input: Hours, Minutes, and AM/PM Picker */}
         <View style={styles.inputRow}>
-          <MaterialIcons name="access-time" size={24} color="#000" />
+          <MaterialIcons name="access-time" size={24} color="#781C68" />
           <TextInput
             style={styles.input}
             placeholder="hours"
@@ -132,14 +133,14 @@ export default function Details({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'grey', // Black background color
+    backgroundColor: 'white', // Black background color
     alignItems: 'center',
     justifyContent: 'center',
   },
   form: {
     padding: 20,
     borderWidth: 2,
-    borderColor: 'grey', // White border color
+    borderColor: '#a06d95', // White border color
     borderRadius: 10,
     width: 300,
     backgroundColor: "white",
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#fff', // White text color
+    color: '#a06d95', // White text color
     marginBottom: 20,
   },
   inputRow: {
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
     marginLeft: 10, // Add margin between icon and input field
   },
   button: {
-    backgroundColor: 'grey', // White background color
+    backgroundColor: '#a06d95', // White background color
     borderRadius: 10,
     padding: 7,
     alignItems: 'center',
@@ -180,5 +181,11 @@ const styles = StyleSheet.create({
     color: 'white', // Black text color
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  label1: {
+    fontSize: 16, 
+    color: 'grey', // White text color
+    marginBottom: 20,
+    padding:20
   },
 });

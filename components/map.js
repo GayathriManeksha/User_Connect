@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button ,TouchableOpacity} from 'react-native';
 import MapView, { UrlTile, Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import axios from 'axios';
@@ -196,10 +196,12 @@ export default function App({route}) {
                     value={searchText}
                     onChangeText={(text) => setSearchText(text)}
                 />
-                <Button title="Search" onPress={handleSearch} />
+                <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
+                    <Text style={styles.searchButtonText}>Search</Text>
+                </TouchableOpacity>
             </View>
-            <Text style={styles.paragraph}>{"Last saved location is " + address}</Text>
-        </View>
+                <Text style={styles.lastSavedLocation}>Last saved location: {address}</Text>
+            </View>
     );
 }
 
@@ -213,17 +215,38 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: 10,
-    },
-    input: {
+        marginHorizontal: 20,
+        marginBottom: 20,
+        padding:10,
+        
+      },
+      input: {
         flex: 1,
-        marginRight: 10,
+        height: 40,
         borderWidth: 1,
-        padding: 8,
-    },
-    paragraph: {
-        fontSize: 18,
-        textAlign: 'center',
-    },
+        borderColor: '#781C68',
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        marginRight: 10,
+        color:'#781C68'
+      },
+      searchButton: {
+        backgroundColor: '#781C68',
+        borderRadius: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+      },
+      searchButtonText: {
+        color: 'white',
+        fontSize: 14,
+        fontWeight: 'bold',
+        
+      },
+      lastSavedLocation: {
+        alignSelf: 'center', 
+        fontSize: 14,
+        color: 'grey',
+        padding:10, 
+        marginBottom:40
+      }
 });

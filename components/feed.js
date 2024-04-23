@@ -1,94 +1,36 @@
-
-import React from 'react';
-import { useEffect } from 'react';
-import { StyleSheet, View, ScrollView, TouchableOpacity, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, ScrollView, TouchableOpacity, Text, Image, Animated, Easing } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from "jwt-decode";
-import { useState } from 'react';
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useGlobalContext } from '../GlobalContext';
 
-//const navigation = useNavigation();
 const handleHomePress = () => {
   // Handle navigation to home
 };
 
-
-
-
-const CategoryCard = ({ category, onPress }) => {
-  const icons = {
-    plumber: 'tools', // You can replace 'tools' with the appropriate icon name
-    Electrician: 'bolt',
-    'House Keeping': 'broom',
-    Mechanic: 'wrench',
-    Beautician: 'cut',
-    carpentry: 'hammer',
-  };
-
-  return (
-    <TouchableOpacity style={styles.categoryLabel} onPress={onPress}>
-      <FontAwesome5 name={icons[category]} size={40} color="#000000" style={styles.categoryIcon} />
-      <Text style={styles.categoryText}>{category}</Text>
-    </TouchableOpacity>
-  );
-};
-
-
 const Feed = () => {
   const navigation = useNavigation();
-  const [username, setUsername] = useState('')
+  const [username, setUsername] = useState('');
   const [location, setLocation] = useState('');
-  
-  // const [address, setAddress] = useState('');
   const { globalState, updateGlobalState } = useGlobalContext();
-  // Access the global state
   const { address } = globalState;
+  const [uid, setUid] = useState('');
 
-  const [uid, setUId] = useState('');
   const handleCategoryPress = (category) => {
     navigation.navigate('category', { category });
   };
+  
   const handleProfilePress = () => {
-    // Handle navigation to profile
     navigation.navigate('profile');
   };
+
   const handleCreatePress = () => {
-    // Handle navigation to create
-    //navigation.navigate('feed');
     navigation.navigate('active'); 
   };
-  const categories = [
-    'plumber',
-    'Electrician',
-    'House Keeping',
-    'Mechanic',
-    'Beautician',
-    'carpentry',
-  ];
-
-  // const storeToken = async (token) => {
-  //   try {
-  //     await AsyncStorage.setItem('token', token);
-  //     console.log('Token stored successfully');
-  //     console.log(token)
-
-  //     // Decode the token to get user details
-
-  //     // const decodedToken = jwt_decode(token);
-  //     // const { name, id } = decodedToken;
-
-  //     // Store user details in AsyncStorage
-  //     // await AsyncStorage.setItem('userId', id);
-  //     // await AsyncStorage.setItem('username', name);
-
-  //   } catch (error) {
-  //     console.error('Failed to store token', error); console.log();
-  //   }
-  // };
 
   const retrieveToken = async () => {
     try {
@@ -98,9 +40,9 @@ const Feed = () => {
         console.log('Token retrieved successfully');
         const decodedToken = jwt_decode(token);
         const { username, password } = decodedToken;
-        console.log(username)
+        console.log(username);
         setUsername(username);
-        setUId(decodedToken.userId)
+        setUid(decodedToken.userId);
         return { username, password };
       } else {
         console.log('Token not found');
@@ -111,77 +53,98 @@ const Feed = () => {
       return null;
     }
   };
+  
   useEffect(() => {
     const fetchData = async () => {
       const { username, password } = await retrieveToken();
       console.log(username);
     };
     fetchData();
-  }, [])
+  }, []);
 
   const handleLocation = () => {
-    navigation.navigate('map', { address })
-  }
-  handleProfile = () => {
-
-  }
+    navigation.navigate('map', { address });
+  };
+  
   useEffect(() => {
     const fetchLocation = async () => {
       try {
         if (uid) {
-          const location = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/user/location/${uid}`)
+          const location = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/user/location/${uid}`);
           console.log(location.data);
-          setLocation(location.data.location)
-          // setAddress(location.data.address)
-          updateGlobalState({address:location.data.address})
+          setLocation(location.data.location);
+          updateGlobalState({address: location.data.address});
           console.log('hello ', address, 'hhi');
         }
       }
       catch (error) {
-        console.log("Error fetching location", error)
+        console.log("Error fetching location", error);
       }
     };
     fetchLocation();
-  }, [uid])
+  }, [uid]);
 
+  const truncateAddress = (address) => {
+    if (address.length > 30) {
+      return address.substring(0, 30) + '...';
+    }
+    return address;
+  };
+  
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="location" size={24} color="white" style={{ marginLeft: 10 }} onPress={handleLocation} />
-        <View>
-          <Text style={styles.categoryText2}>location</Text>
-          <Text style={styles.categoryTextsmall}>{address}</Text>
+       <View style={styles.header}>
+        <Ionicons name="location" size={24} color="#781C68" style={{ marginLeft: 10 }} onPress={handleLocation} />
+        <View style={styles.locationContainer}>
+          <Text style={styles.locationLabel}>Location:</Text>
+          <Text style={styles.locationText}>{truncateAddress(address)}</Text>
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleProfilePress}>
-          <Text style={styles.buttonText}>{username}</Text>
+        <TouchableOpacity style={styles.profileButton} onPress={handleProfilePress}>
+          <Text style={styles.profileButtonText}>{username}</Text>
         </TouchableOpacity>
       </View>
-      {/* <hr style={{ color: "white", width: "100%", height: 0.5 }} /> */}
-      <ScrollView contentContainerStyle={styles.categoryContainer}>
-        <View style={styles.columnContainer}>
-          <View style={styles.column}>
-            {categories.slice(0, Math.ceil(categories.length / 2)).map((category, index) => (
-              <CategoryCard key={index} category={category} onPress={() => handleCategoryPress(category)} />
-            ))}
-          </View>
-          <View style={styles.column}>
-            {categories.slice(Math.ceil(categories.length / 2)).map((category, index) => (
-              <CategoryCard key={index} category={category} onPress={() => handleCategoryPress(category)} />
-            ))}
-          </View>
+      
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.categoryContainer}>
+          <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("plumber")}>
+            <Image source={require('../assets/plumber.jpg')} style={styles.categoryImage} resizeMode="cover" />
+            <Text style={styles.categoryLabel}>Plumber</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("electrician")}>
+            <Image source={require('../assets/electrician.jpg')} style={styles.categoryImage} resizeMode="cover" />
+            <Text style={styles.categoryLabel}>Electrician</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("baby care")}>
+            <Image source={require('../assets/babycare.jpg')} style={styles.categoryImage} resizeMode="cover" />
+            <Text style={styles.categoryLabel}>Baby Care</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("cleaning")}>
+            <Image source={require('../assets/cleaning.jpeg')} style={styles.categoryImage} resizeMode="cover" />
+            <Text style={styles.categoryLabel}>Cleaning</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("home nurse")}>
+            <Image source={require('../assets/homenurse.jpg')} style={styles.categoryImage} resizeMode="cover" />
+            <Text style={styles.categoryLabel}>Home Nurse</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("house keeping")}>
+            <Image source={require('../assets/housekeeping.jpg')} style={styles.categoryImage} resizeMode="cover" />
+            <Text style={styles.categoryLabel}>House Keeping</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
-      {/* Navbar */}
       <View style={styles.navbar}>
         <TouchableOpacity style={styles.navbarButton} onPress={handleHomePress}>
-          <Ionicons name="home-outline" size={24} color="#FFFFFF" />
+          <Ionicons name="home-outline" size={24} color="#781C68" />
+          <Text style={styles.navbarLabel}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navbarButton} onPress={handleCreatePress}>
-          <Ionicons name="create-outline" size={24} color="#FFFFFF" />
+          <Ionicons name="create-outline" size={24} color="#781C68" />
+          <Text style={styles.navbarLabel}>Active</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navbarButton} onPress={handleProfilePress}>
-          <Ionicons name="person-outline" size={20} color="#FFFFFF" />
+          <Ionicons name="person-outline" size={20} color="#781C68" />
+          <Text style={styles.navbarLabel}>Profile</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -191,42 +154,93 @@ const Feed = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
-    justifyContent: 'center',
+    backgroundColor: 'white',
   },
-  columnContainer: {
+  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    marginBottom: 10,
+    marginTop: 20,
+    alignItems: 'center',
+    backgroundColor: 'white',
   },
-  column: {
-    flex: 1,
+  navbarLabel: {
+    fontSize: 12,
+    color: '#781C68',
+  },
+  categoryText2: {
+    fontSize: 16,
+    fontWeight: 'normal',
+    color: '#781C68',
+    marginLeft: 10,
+  },
+  categoryTextsmall: {
+    fontSize: 12,
+    fontWeight: 'normal',
+    color: 'grey',
+    marginLeft: 7,
+    marginTop: 0,
+  },
+  button: {
+    borderRadius: 50,
+    backgroundColor: '#781C68',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 2,
+    width: 30,
+    height: 30,
+    marginLeft: 'auto',
+    marginRight: 10,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  scrollContent: {
+    alignItems: 'center',
   },
   categoryContainer: {
-    padding: 10,
-    backgroundColor: "black",
-    margin: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    paddingVertical: 10,
+  },
+  categoryCard: {
+    width: 150,
+    height: 220,
+    marginBottom: 20,
+    borderRadius: 15,
+    overflow: 'hidden',
+    backgroundColor: 'white',
+    elevation: 4,
+    shadowColor: '#781C68',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.5,
+    shadowRadius: 3.9,
+    marginRight: 10, // Add marginRight to create space between cards
+    marginLeft: 10, 
+  },
+  categoryImage: {
+    width: '100%',
+    height: '70%',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   categoryLabel: {
-    width: 150,
-    height: 250,
-    marginBottom: 10,
-    borderRadius: 15,
-    padding: 10,
-    backgroundColor: '#FFFFFF',
-  },
-  categoryText: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000000',
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 10,
+    color:"#781C68"
   },
   navbar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#000000',
-    width: '100%',
-    height: 42,
-    position: 'absolute',
-    bottom: 0,
+    backgroundColor: 'white',
+    height: 60,
+    alignItems: 'center',
+    padding:10
   },
   navbarButton: {
     flex: 1,
@@ -236,53 +250,44 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    marginBottom: 0,
-    marginTop: 10,
-    backgroundColor: "black"
-  },
-  categoryText2: {
-    fontSize: 16,
-    fontWeight: 'normal',
-    color: "white",
-    marginLeft: 10,
-  },
-  categoryTextsmall: {
-    fontSize: 12,
-    fontWeight: 'normal',
-    color: "white",
-    marginLeft: -1,
-    marginTop: 15,
-  },
-  categoryText3: {
-    fontSize: 16,
-    fontWeight: 'normal',
-    color: "white",
-    marginLeft: 0,
-  },
-
-  categoryLabel: {
-    width: 150,
-    height: 250,
     marginBottom: 10,
-    borderRadius: 15,
-    padding: 10,
+    marginTop: 20,
+    alignItems: 'center',
     backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    elevation: 2,
+    shadowColor: '#781C68',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    borderTopColor:"white"
   },
-  button: {
-    borderRadius: 50, // half of width and height to make it a circle
-    backgroundColor: 'white', // change the color as needed
+  locationContainer: {
+    flex: 1,
+    marginLeft: 20,
+  },
+  locationLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#781C68',
+  },
+  locationText: {
+    fontSize: 12,
+    color: 'grey',
+  },
+  profileButton: {
+    borderRadius: 50,
+    backgroundColor: '#781C68',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 2,
-    width: 30,
-    height: 30,
-    left: -60,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
-  buttonText: {
-    color: 'black',
-    fontSize: 16,
+  profileButtonText: {
+    color: 'white',
+    fontSize: 12,
     fontWeight: 'bold',
   },
 });

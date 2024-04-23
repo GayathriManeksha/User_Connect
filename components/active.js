@@ -56,18 +56,15 @@ export default function Active() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.workerListContainer}>
-        <Text style={styles.heading}>Active Appointments</Text>
-
-        <ScrollView>
+      <View style={styles.workerListContainer}> 
           <FlatList
             data={activeWorkers}
             renderItem={({ item }) => (
               <View style={styles.workerContainer}>
-                <TouchableOpacity style={styles.workerItem}  onPress={() => navigation.navigate('activedetails', { worker: item.worker,amt:item.amount })}>
+                <TouchableOpacity style={styles.workerItem}  onPress={() => navigation.navigate('activedetails', { worker: item.worker,amt:item.amount ,app_id:item._id})}>
                   <View style={styles.workerInfoContainer}>
                     <View style={styles.workerNameContainer}>
-                      <Icon name="account-circle" size={24} color="#333" style={{ marginRight: 8 }} />
+                      <Icon name="account-circle" size={24} color="#781C68" style={{ marginRight: 8 }} />
                       <Text style={styles.workerName}>{item.worker.username}</Text>
                       <Text style={styles.workeramount}>Rs.{item.amount}</Text>
                     </View>
@@ -80,8 +77,7 @@ export default function Active() {
                 </TouchableOpacity>
               </View>
             )}
-          />
-        </ScrollView>
+          /> 
 
       </View>
     </View>
@@ -95,6 +91,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
     padding:10,
+    color:'#781C68'
   },
   workerListContainer: {
     flex: 1,
@@ -135,7 +132,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 0,
-    color: 'grey', // Darker text color
+    color: '#781C68', // Darker text color
     padding:5
   },
   workeramount: {
