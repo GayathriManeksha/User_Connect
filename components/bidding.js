@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, ScrollView, Pressable ,Image ,TouchableWithoutFeedback } from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput, ScrollView, Pressable, Image, TouchableWithoutFeedback } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from 'jwt-decode';
 import { useNavigation } from '@react-navigation/native';
 import socket from "../utils/socket";
+import { useGlobalContext } from '../GlobalContext';
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +32,8 @@ const Bidding = ({ route }) => {
   const [status, setStatus] = useState(-1);
   const [showTooltip, setShowTooltip] = useState(false);
   const generateID = () => Math.random().toString(36).substring(2, 10);
+  const { globalState, updateGlobalState } = useGlobalContext();
+  const { online } = globalState;
 
   const retrieveToken = async () => {
     try {
@@ -75,6 +78,18 @@ const Bidding = ({ route }) => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    // Request permissions for push notifications
+    if (roomId) {
+      console.log("------------------User Online--------------------",roomId)
+      socket.emit("user_online", roomId);
+    }
+    return () => {
+      if (roomId)
+      {console.log("------------------User Offline--------------------",roomId)
+      socket.emit("user_offline", roomId);}
+    };
+  }, [roomId]);
 
   useEffect(() => {
     console.log("Hey from socket");
@@ -115,10 +130,10 @@ const Bidding = ({ route }) => {
             userId: uid,
             workerId,
           });
-          console.log('Chat opened successfully',response.data);
+          console.log('Chat opened successfully', response.data);
           setRoomId(response.data.chatId);
           setWorkerName(response.data.workerName)
-          console.log('name',response.data.workerName);
+          console.log('name', response.data.workerName);
           setMessages(response.data.messages)
           // socket.emit("createRoom", response.data.chatId);
         }
@@ -142,9 +157,9 @@ const Bidding = ({ route }) => {
           setLabel(response.data.amount)
           setBidId(response.data._id)
           setStatus(response.data.approval)
-          console.log("approval value",response.data.approval)
+          console.log("approval value", response.data.approval)
 
-          if (response.data && response.data.approval===0) {
+          if (response.data && response.data.approval === 0) {
             if (response.data.sender.role === "user") {
               setSelfAccepted(true)
             }
@@ -262,30 +277,30 @@ const Bidding = ({ route }) => {
   const onClose = () => { }
   const closeModal = () => setVisible(false);
   return (
-    <View style={styles.container}>  
-      
+    <View style={styles.container}>
+
       {
-      // then there is no active or in-progress bookings
-      (status === -1 ) &&
+        // then there is no active or in-progress bookings
+        (status === -1) &&
         <View style={styles.head}>
           <Text style={styles.heading}>Chat With {workername}</Text>
           <View>
-        <TouchableWithoutFeedback
-          onPressIn={() => setShowTooltip(true)}
-          onPressOut={() => setShowTooltip(false)}
-        >
-          <TouchableOpacity style={styles.sendButton} onPress={() => setVisible(true)} disabled={selfaccepted || workeraccepted}>
-            <Text style={styles.sendButtonText}>Bid</Text>
-          </TouchableOpacity>
-        </TouchableWithoutFeedback>
-        {showTooltip && (
-          <View style={styles.tooltip}>
-            <Text style={styles.tooltipText}>Click to place a bid</Text>
+            <TouchableWithoutFeedback
+              onPressIn={() => setShowTooltip(true)}
+              onPressOut={() => setShowTooltip(false)}
+            >
+              <TouchableOpacity style={styles.sendButton} onPress={() => setVisible(true)} disabled={selfaccepted || workeraccepted}>
+                <Text style={styles.sendButtonText}>Bid</Text>
+              </TouchableOpacity>
+            </TouchableWithoutFeedback>
+            {showTooltip && (
+              <View style={styles.tooltip}>
+                <Text style={styles.tooltipText}>Click to place a bid</Text>
+              </View>
+            )}
           </View>
-        )}
-      </View>
         </View>
-        }
+      }
 
       { //Active bookings (Confirmed)
         status === 1 &&
@@ -324,7 +339,7 @@ const Bidding = ({ route }) => {
         {
           workeraccepted &&
           <View style={styles.popuplabelContainer}>
-             <Image source={require('../assets/pop.jpg')} style={styles.image} />
+            <Image source={require('../assets/pop.jpg')} style={styles.image} />
             <Text style={styles.whiteText}>Worker has accepted the Request</Text>
             <Text style={styles.labelText}> {label}</Text>
             <View style={styles.acceptRejectContainer}>
@@ -361,7 +376,7 @@ const Bidding = ({ route }) => {
                   { backgroundColor: msg.sender.role === 'user' ? '#E6D1E0' : 'white' }
                 ]}>
                   <Text style={styles.labelText}>{msg.content.bidAmount}</Text>
-                   
+
                   {msg.sender.role !== "user" ? (
                     <View style={styles.acceptRejectContainer}>
                       <Pressable style={styles.acceptButton} onPress={() => handleAccept(msg.content.bidAmount, msg._id)}>
@@ -442,9 +457,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
   },
-  heading: { 
-    
-    color:'#781C68',
+  heading: {
+
+    color: '#781C68',
     fontWeight: 'bold',
     fontSize: 18,
     padding: 5,
@@ -455,8 +470,8 @@ const styles = StyleSheet.create({
   },
   chatContainer: {
     flex: 1,
-    marginBottom: 10, 
-     
+    marginBottom: 10,
+
   },
   messageContainer: {
     flexDirection: 'row',
@@ -471,18 +486,18 @@ const styles = StyleSheet.create({
   },
   messageWorkerText: {
 
-    backgroundColor:  '#954C85'    ,
+    backgroundColor: '#954C85',
     padding: 10,
     borderRadius: 10,
-    color:'#E6D1E0',
+    color: '#E6D1E0',
   },
   messageUserText: {
 
-    backgroundColor: '#E6D1E0'    ,
+    backgroundColor: '#E6D1E0',
     padding: 10,
     borderRadius: 10,
-    color:'#781C68',
-   
+    color: '#781C68',
+
 
   },
 
@@ -618,11 +633,11 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   image: {
-    height:100,
-     resizeMode: 'contain', // Adjust the image to fit inside the container
-     marginBottom:100
-   },
-   tooltip: {
+    height: 100,
+    resizeMode: 'contain', // Adjust the image to fit inside the container
+    marginBottom: 100
+  },
+  tooltip: {
     position: 'absolute',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
     borderRadius: 5,

@@ -7,6 +7,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import jwt_decode from "jwt-decode";
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useGlobalContext } from '../GlobalContext';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
+import Constants from 'expo-constants';
+
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
 
 const handleHomePress = () => {
   // Handle navigation to home
@@ -23,13 +35,13 @@ const Feed = () => {
   const handleCategoryPress = (category) => {
     navigation.navigate('category', { category });
   };
-  
+
   const handleProfilePress = () => {
     navigation.navigate('profile');
   };
 
   const handleCreatePress = () => {
-    navigation.navigate('active'); 
+    navigation.navigate('active');
   };
 
   const retrieveToken = async () => {
@@ -40,6 +52,10 @@ const Feed = () => {
         console.log('Token retrieved successfully');
         const decodedToken = jwt_decode(token);
         const { username, password } = decodedToken;
+
+        console.log("Notifications")
+        registerForPushNotificationsAsync(decodedToken.userId);
+
         console.log(username);
         setUsername(username);
         setUid(decodedToken.userId);
@@ -53,7 +69,7 @@ const Feed = () => {
       return null;
     }
   };
-  
+
   useEffect(() => {
     const fetchData = async () => {
       const { username, password } = await retrieveToken();
@@ -62,10 +78,41 @@ const Feed = () => {
     fetchData();
   }, []);
 
+
+  const registerForPushNotificationsAsync = async (uid) => {
+    console.log("register for push notifications")
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+
+    const { status } = await Notifications.requestPermissionsAsync();
+    console.log(status)
+    if (status !== 'granted') {
+      alert('Permission to receive push notifications has not been granted!');
+      return;
+    }
+
+
+    const token = (await Notifications.getExpoPushTokenAsync({
+      projectId: Constants.expoConfig.extra?.eas.projectId,
+    })).data;
+    console.log(token); // Send this token to your server to associate with the user
+    const requestBody = {
+      userId: uid,
+      token
+    };
+    axios.post(`${process.env.EXPO_PUBLIC_API_URL}/user/savetoken`, requestBody)
+  };
+
   const handleLocation = () => {
     navigation.navigate('map', { address });
   };
-  
+
   useEffect(() => {
     const fetchLocation = async () => {
       try {
@@ -73,7 +120,7 @@ const Feed = () => {
           const location = await axios.get(`${process.env.EXPO_PUBLIC_API_URL}/user/location/${uid}`);
           console.log(location.data);
           setLocation(location.data.location);
-          updateGlobalState({address: location.data.address});
+          updateGlobalState({ address: location.data.address });
           console.log('hello ', address, 'hhi');
         }
       }
@@ -90,10 +137,10 @@ const Feed = () => {
     }
     return address;
   };
-  
+
   return (
     <View style={styles.container}>
-       <View style={styles.header}>
+      <View style={styles.header}>
         <Ionicons name="location" size={24} color="#781C68" style={{ marginLeft: 10 }} onPress={handleLocation} />
         <View style={styles.locationContainer}>
           <Text style={styles.locationLabel}>Location:</Text>
@@ -103,7 +150,7 @@ const Feed = () => {
           <Text style={styles.profileButtonText}>{username}</Text>
         </TouchableOpacity>
       </View>
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.categoryContainer}>
           <TouchableOpacity style={styles.categoryCard} onPress={() => handleCategoryPress("plumber")}>
@@ -218,7 +265,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 3.9,
     marginRight: 10, // Add marginRight to create space between cards
-    marginLeft: 10, 
+    marginLeft: 10,
   },
   categoryImage: {
     width: '100%',
@@ -232,7 +279,7 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     marginTop: 10,
-    color:"#781C68"
+    color: "#781C68"
   },
   navbar: {
     flexDirection: 'row',
@@ -240,7 +287,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     height: 60,
     alignItems: 'center',
-    padding:10
+    padding: 10
   },
   navbarButton: {
     flex: 1,
@@ -262,7 +309,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
-    borderTopColor:"white"
+    borderTopColor: "white"
   },
   locationContainer: {
     flex: 1,

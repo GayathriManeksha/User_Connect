@@ -10,7 +10,8 @@ export const useGlobalContext = () => useContext(GlobalContext);
 export const GlobalProvider = ({ children }) => {
     // Define the global state and functions to update it
     const [globalState, setGlobalState] = useState({
-        address:''
+        address:'',
+        online:false
     });
 
     const updateGlobalState = (newState) => {
